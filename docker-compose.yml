@@ -1,0 +1,16 @@
+services:
+  management.api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: management.api
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "http://+:8080"
+      Jwt__Issuer: "management-app"
+      Jwt__Audience: "management-users"
+      Jwt__Key: "super-secret-key-123456"
+      ConnectionStrings__Default: "Server=your-cloud-db-host;Port=3306;Database=ManagementDb;Uid=admin;Pwd=admin123"
+    restart: unless-stopped
