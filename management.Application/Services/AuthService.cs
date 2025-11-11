@@ -53,7 +53,7 @@ public class AuthService : IAuthService
 
 
     
-    public async Task<AuthResponseDto> login(loginDto loginDto)
+    public async Task<AuthResponseDto> login(LoginDto loginDto)
     {
         var users = await _repository.GetAllAsync();
         var user = users.FirstOrDefault(u => u.Email == loginDto.Email && u.IsActive);

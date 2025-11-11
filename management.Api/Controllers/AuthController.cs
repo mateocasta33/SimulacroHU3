@@ -17,7 +17,7 @@ public class AuthController : ControllerBase
 
     // Api login
     [HttpPost("login")]
-    public async Task<ActionResult<AuthResponseDto>> Login(loginDto registerDto)
+    public async Task<ActionResult<AuthResponseDto>> Login(LoginDto registerDto)
     {
         try
         {

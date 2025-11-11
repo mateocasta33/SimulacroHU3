@@ -16,7 +16,7 @@ public class RegisterDto
     public string Role { get; set; } = "User";
 }
 
-public class loginDto
+public class LoginDto
 {
     public string Password { get; set; }
     public string Email { get; set; }
