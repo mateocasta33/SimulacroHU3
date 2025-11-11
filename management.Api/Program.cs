@@ -11,30 +11,34 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-var connection = builder.Configuration.GetConnectionString("Default");
+
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
 
-builder.Services.AddAutoMapper(typeof(MapProfile).Assembly);
-// Metodos
+var connection = builder.Configuration.GetConnectionString("Default");
+if (string.IsNullOrEmpty(connection))
+{
+    // Para desarrollo local
+    connection = "Server=localhost;Database=management_db;Uid=root;Pwd=;";
+}
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connection, ServerVersion.AutoDetect(connection)));
+
+builder.Services.AddAutoMapper(typeof(MapProfile));
+
+// Dependency Injection
 builder.Services.AddScoped<IRepository<Product>, ProductsRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRepository<User>, UserRepository>();
 
-builder.Services.AddAutoMapper(typeof(MapProfile));
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "DefaultKeyForDevelopmentChangeInProduction12345";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "management-api";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "management-users";
 
-
-// Base de datos
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connection, MySqlServerVersion.AutoDetect(connection)));
-
-
-// JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -44,10 +48,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 
@@ -62,33 +65,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+app.Run();
