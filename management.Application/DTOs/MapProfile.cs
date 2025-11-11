@@ -8,7 +8,6 @@ namespace management.Application.DTOs
     {
         public MapProfile()
         {
-            // Mapeos de productos (ok)
             CreateMap<ProductDto, Product>();
             CreateMap<Product, ProductDto>();
             CreateMap<ProductCreateDto, Product>();
@@ -16,12 +15,14 @@ namespace management.Application.DTOs
             CreateMap<ProductUpdateDto, Product>();
             CreateMap<Product, ProductUpdateDto>();
 
+            CreateMap<User, UserDto>(); 
+            CreateMap<UserUpdateDto, User>();
+            
             // Mapeo de registro -> usuario (IMPORTANTE)
             CreateMap<RegisterDto, User>()
                 .ForMember(dest => dest.PasswordHash,
                     opt => opt.MapFrom(src => BCrypt.Net.BCrypt.HashPassword(src.Password)));
 
-            // Mapeo de usuario -> respuesta de autenticación
             CreateMap<User, AuthResponseDto>();
         }
     }
