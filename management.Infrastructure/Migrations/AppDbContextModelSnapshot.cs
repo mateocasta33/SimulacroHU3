@@ -73,6 +73,12 @@ namespace management.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("RefreshTokenExpiry")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("longtext");

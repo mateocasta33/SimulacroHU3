@@ -1,6 +1,7 @@
 using management.Application.DTOs;
 using management.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace management.Api.Controllers;
 
@@ -21,7 +22,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var register = await _authService.login(registerDto);
+            var register = await _authService.LoginAsync(registerDto);
             return Ok(register);
         }
         catch (NullReferenceException e)
@@ -44,7 +45,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var result = await _authService.register(registerDto);
+            var result = await _authService.RegisterAsync(registerDto);
             return Ok(result);
         }
         catch (NullReferenceException e)
@@ -54,6 +55,38 @@ public class AuthController : ControllerBase
         catch (ArgumentNullException e)
         {
             return BadRequest(new { message = e.Message });
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, new { message = "Error interno del servidor", details = e.Message });
+        }
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<AuthResponseDto>> RefreshToken(RefreshTokenDto refreshTokenDto)
+    {
+        try
+        {
+            var result = await _authService.RefreshTokenAsync(refreshTokenDto);
+            return Ok(result);
+        }
+        catch (SecurityTokenException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, new { message = "Error interno del servidor", details = e.Message });
+        }
+    }
+
+    [HttpPost]
+    public async Task<ActionResult> RevokeToken(RevokeTokenDto revokeTokenDto)
+    {
+        try
+        {
+            var result = await _authService.RevokeTokenAsync(revokeTokenDto);
+            return Ok(result);
         }
         catch (Exception e)
         {
