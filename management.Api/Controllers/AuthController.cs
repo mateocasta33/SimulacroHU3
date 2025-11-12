@@ -15,8 +15,8 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
-
-    // Api login
+    
+    
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginDto registerDto)
     {
@@ -62,7 +62,7 @@ public class AuthController : ControllerBase
         }
     }
 
-    [HttpPost]
+    [HttpPost("refresh-token")]
     public async Task<ActionResult<AuthResponseDto>> RefreshToken(RefreshTokenDto refreshTokenDto)
     {
         try
@@ -80,7 +80,7 @@ public class AuthController : ControllerBase
         }
     }
 
-    [HttpPost]
+    [HttpPost("revoke-token")]
     public async Task<ActionResult> RevokeToken(RevokeTokenDto revokeTokenDto)
     {
         try
